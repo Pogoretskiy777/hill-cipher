@@ -1,3 +1,6 @@
+import java.util.*;
+import java.io.*;
+
 public class PogoretskiyJosephHillCipher {
 
   public static int xgcd(int inE, int inZ) {
@@ -116,12 +119,15 @@ public class PogoretskiyJosephHillCipher {
   }
 
   public static int[] decrypt(int ciphertext[], int decryptionKey[][]) {
+    int[] copiedCiphertext = new int[ciphertext.length];
+    System.arraycopy(ciphertext, 0, copiedCiphertext, 0, ciphertext.length);
+
     // Convert plaintext into an array of pairs.
-    int[][] plainInPairs = new int[ciphertext.length / 2][2];
+    int[][] plainInPairs = new int[copiedCiphertext.length / 2][2];
     int row = 0;
     int col = 0;
-    for (int i = 0; i < ciphertext.length; i++) {
-      plainInPairs[row][col] = ciphertext[i];
+    for (int i = 0; i < copiedCiphertext.length; i++) {
+      plainInPairs[row][col] = copiedCiphertext[i];
       if (++col == 2) {
         col = 0;
         row += 1;
@@ -141,12 +147,92 @@ public class PogoretskiyJosephHillCipher {
     int count = 0;
     for (int i = 0; i < plainInPairs.length; i++) {
       for (int j = 0; j < plainInPairs[i].length; j++) {
-        ciphertext[count] = plainInPairs[i][j];
+        copiedCiphertext[count] = plainInPairs[i][j];
         count++;
       }
     }
 
-    return ciphertext;
+    return copiedCiphertext;
+  }
+
+  public static void crackCipher(int[] ciphertext) {
+    // Create an English alphabet (uppercase) mapped to indicies 0-25.
+    char[] alphabet = new char[26];
+    for (int i = 0; i < 26; i++) {
+      alphabet[i] = (char) ('A' + i);
+    }
+    try {
+      FileWriter fw = new FileWriter("cracked-results.txt", false);
+
+      int count = 0;
+      for (int i = 0; i < 26; i++) {
+        for (int j = 0; j < 26; j++) {
+          for (int k = 0; k < 26; k++) {
+            for (int l = 0; l < 26; l++) {
+              if ((i * l) - (j * k) == 0) {
+                continue;
+              }
+              int[][] decryptionKey = { { i, j }, { k, l } };
+              int[] result = decrypt(ciphertext, decryptionKey);
+              String decryptedString = "";
+              for (int m = 0; m < result.length; m++) {
+                decryptedString += (alphabet[result[m]]);
+              }
+              for (int n = 0; n < decryptedString.length(); n++) {
+                fw.write(decryptedString.charAt(n));
+              }
+              fw.write("\n");
+              if (count == 60177) {
+                for (int o = 0; o < decryptionKey.length; o++) {
+                  System.out.print(" ");
+                  for (int p = 0; p < decryptionKey[o].length; p++) {
+                    System.out.print(decryptionKey[o][p] + " ");
+                  }
+                  System.out.println();
+                }
+                System.out.println(decryptedString);
+              }
+              count++;
+            }
+          }
+        }
+      }
+      fw.close();
+    } catch (Exception e) {
+      e.getStackTrace();
+    }
+
+    System.out.println("File written successfully.");
+  }
+
+  public static void searchAndSaveLinesContainingWord(String inputFilePath, String outputFilePath, String searchTerm) {
+    List<String> matchingLines = new ArrayList<>();
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath))) {
+      String line;
+      // Read each line from the input file
+      while ((line = reader.readLine()) != null) {
+        // Check if the line contains the search term
+        if (line.contains(searchTerm)) {
+          matchingLines.add(line); // Add matching lines to the list
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Error reading the input file: " + e.getMessage());
+      return; // Exit if there is an error
+    }
+
+    // Write the matching lines to the output file
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath, true))) {
+      for (String matchingLine : matchingLines) {
+        writer.write(matchingLine);
+        writer.newLine(); // Write a new line after each entry
+      }
+    } catch (IOException e) {
+      System.err.println("Error writing to the output file: " + e.getMessage());
+    }
+
+    System.out.println("Matching lines have been saved to: " + outputFilePath);
   }
 
   public static void main(String args[]) {
@@ -225,6 +311,43 @@ public class PogoretskiyJosephHillCipher {
       decryptedString += (alphabet[decrypted[i]]);
     }
     System.out.println("      Decrypted:          " + decryptedString + "\n");
+
+    /* Crack ciphertext */
+    String cipherToCrack = "HDHNXZHFGWVKPOBOHFCBKYWGATXUNNOXJFUUXZLUDXLKECNOPINYJRAQYOXPVKTMTBUELRNTKOCBKYXANTHNKIHFOJ";
+    // Convert ciphertext String into an array of integers.
+    int[] cipherCrackInt = new int[cipherToCrack.length()];
+    for (int i = 0; i < cipherToCrack.length(); i++) {
+      for (int j = 0; j < alphabet.length; j++) {
+        if (alphabet[j] == cipherToCrack.charAt(i)) {
+          cipherCrackInt[i] = j;
+          break;
+        }
+      }
+    }
+    crackCipher(cipherCrackInt);
+
+    // // Read and uppercase common words
+    // Set<String> commonWords = new HashSet<>();
+    // try (BufferedReader commonWordsReader = new BufferedReader(new
+    // FileReader("common-5.txt"))) {
+    // String word;
+    // while ((word = commonWordsReader.readLine()) != null) {
+    // commonWords.add(word.toUpperCase().trim()); // Store words in uppercase
+    // }
+    // } catch (IOException e) {
+    // System.err.println("Error reading the common words file: " + e.getMessage());
+    // return; // Exit if there is an error
+    // }
+    // String inputFilePath = "cracked-results.txt"; // Replace with your input file
+    // path
+    // String outputFilePath = "filtered.txt"; // Replace with your desired output
+    // file path
+    // String searchTerm = "ABACK"; // Replace with the word you want to search for
+
+    // for (String word : commonWords) {
+    // searchAndSaveLinesContainingWord(inputFilePath, outputFilePath, word);
+    // }
+
   }
 
 }
