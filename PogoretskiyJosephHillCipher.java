@@ -338,6 +338,26 @@ public class PogoretskiyJosephHillCipher {
       }
     }
     crackCipher(cipherCrackInt);
+    System.err.println();
+
+    // // Read and uppercase common words
+    // Set<String> commonWords = new HashSet<>();
+    // try (BufferedReader commonWordsReader = new BufferedReader(new
+    // FileReader("common-5.txt"))) {
+    // String word;
+    // while ((word = commonWordsReader.readLine()) != null) {
+    // commonWords.add(word.toUpperCase().trim());
+    // }
+    // } catch (IOException e) {
+    // System.err.println("Error reading the common words file: " + e.getMessage());
+    // return;
+    // }
+    // String inputFilePath = "cracked-results.txt";
+    // String outputFilePath = "filtered.txt";
+
+    // for (String word : commonWords) {
+    // searchAndSaveCommonWordLines(inputFilePath, outputFilePath, word);
+    // }
   }
 
 }
