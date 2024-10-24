@@ -182,15 +182,30 @@ public class PogoretskiyJosephHillCipher {
                 fw.write(decryptedString.charAt(n));
               }
               fw.write("\n");
-              if (count == 60177) {
+              if (count == 60177) { // Line in .txt file where cleartext I found.
+                System.out.println(
+                    "(Bonus) Decrypt the following ciphertext: HDHNXZHFGWVKPOBOHFCBKYWGATXUNNOXJFUUXZLUDXLKECNOPINYJRAQYOXPVKTMTBUELRNTKOCBKYXANTHNKIHFOJ\n");
+                System.out.println("      Decryption key: ");
                 for (int o = 0; o < decryptionKey.length; o++) {
-                  System.out.print(" ");
+                  System.out.print("                          ");
                   for (int p = 0; p < decryptionKey[o].length; p++) {
                     System.out.print(decryptionKey[o][p] + " ");
                   }
                   System.out.println();
                 }
-                System.out.println(decryptedString);
+
+                int[][] encryptionKey = findDecryptionKey(decryptionKey);
+
+                // Print decryption key
+                System.out.println("\n      Encryption Key:   ");
+                for (int q = 0; q < encryptionKey.length; q++) {
+                  System.out.print("                          ");
+                  for (int r = 0; r < encryptionKey[q].length; r++) {
+                    System.out.print(encryptionKey[q][r] + "  ");
+                  }
+                  System.out.println();
+                }
+                System.out.println("\nCleartext: " + decryptedString);
               }
               count++;
             }
@@ -201,32 +216,29 @@ public class PogoretskiyJosephHillCipher {
     } catch (Exception e) {
       e.getStackTrace();
     }
-
-    System.out.println("File written successfully.");
   }
 
-  public static void searchAndSaveLinesContainingWord(String inputFilePath, String outputFilePath, String searchTerm) {
+  public static void searchAndSaveCommonWordLines(String inputFilePath, String outputFilePath, String searchTerm) {
     List<String> matchingLines = new ArrayList<>();
 
+    // Search and save matching lines to an array
     try (BufferedReader reader = new BufferedReader(new FileReader(inputFilePath))) {
       String line;
-      // Read each line from the input file
       while ((line = reader.readLine()) != null) {
-        // Check if the line contains the search term
         if (line.contains(searchTerm)) {
-          matchingLines.add(line); // Add matching lines to the list
+          matchingLines.add(line);
         }
       }
     } catch (IOException e) {
       System.err.println("Error reading the input file: " + e.getMessage());
-      return; // Exit if there is an error
+      return;
     }
 
     // Write the matching lines to the output file
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath, true))) {
       for (String matchingLine : matchingLines) {
         writer.write(matchingLine);
-        writer.newLine(); // Write a new line after each entry
+        writer.newLine();
       }
     } catch (IOException e) {
       System.err.println("Error writing to the output file: " + e.getMessage());
@@ -314,6 +326,7 @@ public class PogoretskiyJosephHillCipher {
 
     /* Crack ciphertext */
     String cipherToCrack = "HDHNXZHFGWVKPOBOHFCBKYWGATXUNNOXJFUUXZLUDXLKECNOPINYJRAQYOXPVKTMTBUELRNTKOCBKYXANTHNKIHFOJ";
+
     // Convert ciphertext String into an array of integers.
     int[] cipherCrackInt = new int[cipherToCrack.length()];
     for (int i = 0; i < cipherToCrack.length(); i++) {
@@ -325,29 +338,6 @@ public class PogoretskiyJosephHillCipher {
       }
     }
     crackCipher(cipherCrackInt);
-
-    // // Read and uppercase common words
-    // Set<String> commonWords = new HashSet<>();
-    // try (BufferedReader commonWordsReader = new BufferedReader(new
-    // FileReader("common-5.txt"))) {
-    // String word;
-    // while ((word = commonWordsReader.readLine()) != null) {
-    // commonWords.add(word.toUpperCase().trim()); // Store words in uppercase
-    // }
-    // } catch (IOException e) {
-    // System.err.println("Error reading the common words file: " + e.getMessage());
-    // return; // Exit if there is an error
-    // }
-    // String inputFilePath = "cracked-results.txt"; // Replace with your input file
-    // path
-    // String outputFilePath = "filtered.txt"; // Replace with your desired output
-    // file path
-    // String searchTerm = "ABACK"; // Replace with the word you want to search for
-
-    // for (String word : commonWords) {
-    // searchAndSaveLinesContainingWord(inputFilePath, outputFilePath, word);
-    // }
-
   }
 
 }
